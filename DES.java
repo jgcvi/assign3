@@ -1,26 +1,26 @@
 public static void main(String []args) {
-	if(args.length < 3)
+	if(args.length < 1)
 		exit();
 
-	if(args[2].equals("-h") && args.length == 3)
+	if(args[1].equals("-h") && args.length == 1)
 	{
 		System.out.println("java DES -h\njava DES -k\njava DES -e <64_bit_key_in_hex> -i <input_file> -o <output_file>\njava DES -d <64_bit_key_in_hex> -i <input_file> -o <output_file>\n");
 		return;
 	} else
 		exit();
 
-	if(args[2].equals("-k") && args.length == 3)
+	if(args[1].equals("-k") && args.length == 1)
 	{
 		generateDES();
 	} else
 		exit();
 
 	boolean encrypt = false;
-	if(args.length == 8)
+	if(args.length == 5)
 	{
 		String[] arguments = {null, null, null};
 		int i;
-		for(i = 3; i < 8; i += 2)
+		for(i = 0; i < 5; i += 2)
 		{
 			if(args[i].equals("-e"))
 			{

@@ -1,12 +1,12 @@
 public static void main(String []args) {
-	if(args.length < 3)
+	if(args.length < 1)
 		exit();
 
-	else if(args.length == 6)
+	else if(args.length == 3)
 	{
 		String[] arguments = {null, null};
 		int i;
-		for(i = 3; i < 6; i += 2)
+		for(i = 0; i < 3; i += 2)
 		{
 			if(args[i].equals("-k"))
 				arguments[0] = args[i+1];
@@ -18,12 +18,12 @@ public static void main(String []args) {
 			exit();
 		else generateKey(arguments);
 
-	} else if(args.length == 8)
+	} else if(args.length == 5)
 	{
 		boolean encrypt = false;
 		int i;
 		String[] arguments = {null, null, null};
-		for(i = 3; i < 8; i += 2)
+		for(i = 0; i < 5; i += 2)
 		{
 			if(args[i].equals("-e"))
 			{
