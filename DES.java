@@ -1,3 +1,5 @@
+import Java.awt.Point;
+import Java.awt.PointerInfo;
 public static void main(String []args) {
 	if(args.length < 1)
 		exit();
@@ -49,9 +51,51 @@ void exit() {
 }
 
 static void encrypt(String[] args) {
-	
+	long key = Long.ParseLong(args[0]), lowRet;
+	int []removals = {7, 15, 23, 31, 39, 47, 55, 63};
+	int i;
+
+	for(i = 0; i < 8; i ++)
+	{
+		// lowRet retains all bits smaller than the nth bit
+		lowRet = key % (1 << (removals[i] + 1));
+		// key is now retained bits + larger bits shifted right one
+		key = lowRet + (key - (lowRet) >> 1);
+	}
+
+	int[] shifts = {1,1,2,2,
+			2,2,2,2,
+			2,1,2,2,
+			2,2,1}
+	long right_key = key % (1 << 24);
+	long left_key = (key - right_key) >> 24;
+	for(int i = 0; i < 15; i ++)
+	{
+		applyOperations(); // pseudocoding
+
+		right_key = right_key >> (24 - shifts[i]) + right_key << shifts[i];
+		left_key = left_key >> (24 - shifts[i]) + left_key << shifts[i];
+	}
 }
 
 static void decrypt(String[] args) {
+
+}
+
+void generateDES() {
+	long time = System.currentTimeMillis(), point, time2;
+	Point pt = MouseInfo.getPointerInfo().getLocation();
+	point = pt.getY() * (1 + pt.getY());
+	time *= time ^ point;
+
+	if(time < Math.pow(2, 31)
+		time += Math.pow(7, pt.getY());
+   	else if (time < Math.pow(2, 53)
+		time += Math.pow(11, pt.getX());
+
+	time2 = System.currentTimeMillis();
+	time ^= time2;
+
+	System.out.printf("%x", time);
 
 }

@@ -59,3 +59,7 @@ static void encrypt(String[] args) {
 static void decrypt(String[] args) {
 
 }
+
+void generateKey(String []args) {
+
+}
