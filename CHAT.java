@@ -26,7 +26,6 @@ public static void main(String[] args) {
 
 	BufferedReader stdin, tcpin;
 	try {
-		
 		stdin = new BufferedReader(new InputStreamReader(System.in));
 		tcpin = new BufferedReader(new InputStreamReader(s));
 		e = new Socket(ip, port);

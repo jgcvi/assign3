@@ -1,5 +1,7 @@
-import Java.awt.Point;
-import Java.awt.PointerInfo;
+import java.awt.Point;
+import java.awt.PointerInfo;
+
+import java.io.File;
 public static void main(String []args) {
 	if(args.length < 1)
 		exit();
@@ -11,7 +13,7 @@ public static void main(String []args) {
 	} else
 		exit();
 
-	if(args[1].equals("-k") && args.length == 1)
+	if(args[0].equals("-k") && args.length == 1)
 	{
 		generateDES();
 	} else
@@ -51,9 +53,19 @@ void exit() {
 }
 
 static void encrypt(String[] args) {
+	// figure out how to efficiently represent 24 bits. This isn't C
 	long key = Long.ParseLong(args[0]), lowRet;
 	int []removals = {7, 15, 23, 31, 39, 47, 55, 63};
 	int i;
+
+	FileInputStream fs;
+
+	try {
+		fs = new FileInputStream(new File(args[1]));
+	} catch (IOException e) {
+		System.out.println("Failed opening input in encrypt");
+		exit();
+	}
 
 	for(i = 0; i < 8; i ++)
 	{
@@ -68,11 +80,14 @@ static void encrypt(String[] args) {
 			2,1,2,2,
 			2,2,1}
 	long right_key = key % (1 << 24);
-	long left_key = (key - right_key) >> 24;
+	// you don't technically need to subtract, whatever
+	long left_key = (key - right_key) >> 23;
+
 	for(int i = 0; i < 15; i ++)
 	{
 		applyOperations(); // pseudocoding
 
+		// first operand is the low bits, second is the higher bits. 
 		right_key = right_key >> (24 - shifts[i]) + right_key << shifts[i];
 		left_key = left_key >> (24 - shifts[i]) + left_key << shifts[i];
 	}

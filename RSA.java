@@ -60,6 +60,7 @@ static void decrypt(String[] args) {
 
 }
 
+//generate a public and private key, using the filenames in args
 void generateKey(String []args) {
-
+	
 }
