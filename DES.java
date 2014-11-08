@@ -1,5 +1,6 @@
 import java.awt.Point;
 import java.awt.PointerInfo;
+import java.util.arraylist;
 
 import java.io.File;
 public static void main(String []args) {
@@ -85,12 +86,48 @@ static void encrypt(String[] args) {
 
 	for(int i = 0; i < 15; i ++)
 	{
-		applyOperations(); // pseudocoding
+		applyOperations(fs, keyArray); // pseudocoding
 
 		// first operand is the low bits, second is the higher bits. 
 		right_key = right_key >> (24 - shifts[i]) + right_key << shifts[i];
 		left_key = left_key >> (24 - shifts[i]) + left_key << shifts[i];
 	}
+}
+
+private void applyOperations(FileInputStream fs, byte[][] keyArray){
+
+	Arraylist <String> blockList = new Arraylist <String>();
+	byte next;
+	int count, 
+	int index = 0;
+	while((next = fs.read()) != null) {
+		count = count + 1 % 64;
+		if(count == 0){
+			index++;
+		}
+		blockList.set(index, blockList.get(index).concat((String)next));
+	}
+
+	String temp = blockList.get(index);
+	while(count < 64 && count != 0)
+	{
+		temp = '0' + temp;
+		count++;
+	}
+
+	blockList.set(index, temp);
+
+
+	int size = blockList.size();
+
+	for(int i = 0; i < size; i++){
+		for(int j = 0; j < 64; j++){
+			System.out.printf("%X", blockList.set(i, blockList.get(i) ^ keyArray[i][j]);
+		}
+	}
+
+
+
 }
 
 static void decrypt(String[] args) {
