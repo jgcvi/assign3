@@ -4,7 +4,7 @@ import java.io.*;
 
 import java.io.File;
 public class DES {
-	int _keyLen = 56;
+	static int _keyLen = 16;
 
 	public static void main(String []args) throws Exception {
 		if(args.length < 1)
@@ -14,21 +14,18 @@ public class DES {
 		{
 			System.out.println("java DES -h\njava DES -k\njava DES -e <64_bit_key_in_hex> -i <input_file> -o <output_file>\njava DES -d <64_bit_key_in_hex> -i <input_file> -o <output_file>\n");
 			return;
-		} else
-			exit();
-
-		if(args[0].equals("-k") && args.length == 1)
+		} else if(args[0].equals("-k") && args.length == 1)
 		{
 			generateDES();
-		} else
+		} else if(args.length == 1)
 			exit();
 
 		boolean encrypt = false;
-		if(args.length == 5)
+		if(args.length == 6)
 		{
 			String[] arguments = {null, null, null};
 			int i;
-			for(i = 0; i < 5; i += 2)
+			for(i = 0; i < 6; i += 2)
 			{
 				if(args[i].equals("-e"))
 				{
@@ -56,21 +53,31 @@ public class DES {
 		System.exit(1);
 	}
 
-	public  void encrypt(String[] args) throws Exception{
+	static void encrypt(String[] args) throws Exception{
+
+		System.out.println("HERE");
 		FileInputStream fs = openInputFile(args[1]);
 		PrintWriter fw = openOutputFile(args[2]);
 
 		byte[][] keyArray = getAllKeys(args[0]);
-
+		System.out.println("HERE2");
 		applyOperations(fs, fw, keyArray);
+		System.out.println("HERE3");
 	}
 
-	private PrintWriter openOutputFile(String filename) {
+	static PrintWriter openOutputFile(String filename) {
 		PrintWriter fw;
 
 		try {
 			fw = new PrintWriter(filename, "UTF-8");
+<<<<<<< HEAD
 			return fw;
+=======
+			fw.println("hello");
+			return fw;
+
+
+>>>>>>> FETCH_HEAD
 		} catch (Exception e)
 		{
 			System.out.println("Failed to open output file");
@@ -78,7 +85,7 @@ public class DES {
 		}
 		return null;
 	}
-	private FileInputStream openInputFile(String filename) {
+	static FileInputStream openInputFile(String filename) {
 		FileInputStream fs;
 
 		try {
@@ -92,7 +99,7 @@ public class DES {
 		return null;
 	}
 
-	private byte[] generateShiftKey(int shift, byte[] key) {
+	static byte[] generateShiftKey(int shift, byte[] key) {
 		byte[] retain = new byte[shift];
 		if(shift == 2)
 		{
@@ -113,13 +120,13 @@ public class DES {
 		return key;
 	}
 
-	private byte[][] getAllKeys(String key) {
+	static byte[][] getAllKeys(String key) {
 		byte[] combinedKey = new byte[56];
 		int[] removals = {7, 15, 23, 31, 39, 47, 55, 63};
 		int i, count = 0, j;
 
 		// retain the proper bytes
-		for(i = 0; i < 64; i ++)
+		for(i = 0; i < _keyLen; i ++)
 		{
 			if(i == 7 || i == 15 || i == 23 || i == 31 || i == 39 || 
 				i == 47 || i == 55 || i == 63)
@@ -152,17 +159,21 @@ public class DES {
 		return keyArray;
 	}
 
-	private void applyOperations(FileInputStream fs, PrintWriter fw, byte[][] keyArray) throws Exception {
-
+	static void applyOperations(FileInputStream fs, PrintWriter fw, byte[][] keyArray) {
 		ArrayList <String> blockList = new ArrayList <String>();
 		byte next;
-		int count = 0, index = 0;
-		while((next = (byte) fs.read()) != -1) {
-			count = (count + 1) % _keyLen;
-			if(count == 0){
-				index++;
+		int count = -1, index = -1;
+		try {
+			while((next = (byte) fs.read()) != -1) {
+				count = (count + 1) % _keyLen;
+				if(count == 0){
+					index++;
+					blockList.add("");
+				}
+				blockList.set(index, blockList.get(index) + (byte) next);
 			}
-			blockList.set(index, blockList.get(index) + (byte) next);
+		} catch(Exception e){
+			e.printStackTrace(System.out);
 		}
 
 		String temp = blockList.get(index);
@@ -180,13 +191,20 @@ public class DES {
 			temp = blockList.get(i);
 
 			for(int j = 0; j < _keyLen; j++)
-				fw.printf("%X", temp.charAt(j) ^ keyArray[i % 16][j]);
-
+			{
+				System.out.printf("%X", temp.charAt(j) ^ keyArray[i % 16][j]);
+				try {
+					fw.printf("%X", temp.charAt(j) ^ keyArray[i % 16][j]);
+				} catch(Exception e){
+					e.printStackTrace(System.out);
+				}
+			}
+			System.out.println();
 			fw.println();
 		}
 	}
 
-	public  void decrypt(String[] args) throws Exception {
+	public static void decrypt(String[] args) throws Exception {
 		FileInputStream fs = openInputFile(args[1]);
 		PrintWriter fw = openOutputFile(args[2]);
 
