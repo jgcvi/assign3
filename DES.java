@@ -1,16 +1,16 @@
-import java.awt.Point;
-import java.awt.PointerInfo;
-import java.util.arraylist;
+import java.awt.*;
+import java.util.ArrayList;
+import java.io.*;
 
 import java.io.File;
 public class DES {
 	int _keyLen = 56;
 
-	public static void main(String []args) {
+	public  void main(String []args) throws Exception {
 		if(args.length < 1)
 			exit();
 
-		if(args[1].equals("-h") && args.length == 1)
+		if(args[0].equals("-h") && args.length == 1)
 		{
 			System.out.println("java DES -h\njava DES -k\njava DES -e <64_bit_key_in_hex> -i <input_file> -o <output_file>\njava DES -d <64_bit_key_in_hex> -i <input_file> -o <output_file>\n");
 			return;
@@ -56,7 +56,7 @@ public class DES {
 		System.exit(1);
 	}
 
-	public static void encrypt() {
+	public  void encrypt(String[] args) throws Exception{
 		FileInputStream fs = openInputFile(args[1]);
 		PrintWriter fw = openOutputFile(args[2]);
 
@@ -69,24 +69,27 @@ public class DES {
 		PrintWriter fw;
 
 		try {
-			fw = new PrintWriter(filename, "UTF-8"));
-		} catch (Excepton e)
+			fw = new PrintWriter(filename, "UTF-8");
+			return fw;
+		} catch (Exception e)
 		{
 			System.out.println("Failed to open output file");
 			exit();
 		}
+		return null;
 	}
 	private FileInputStream openInputFile(String filename) {
 		FileInputStream fs;
 
 		try {
 			fs = new FileInputStream(new File(filename));
+			return fs;
 		} catch (IOException e)
 		{
 			System.out.println("Failed to open input file");
 			exit();
 		}
-		return fs;
+		return null;
 	}
 
 	private byte[] generateShiftKey(int shift, byte[] key) {
@@ -112,13 +115,14 @@ public class DES {
 
 	private byte[][] getAllKeys(String key) {
 		byte[] combinedKey = new byte[56];
-		int []removals = {7, 15, 23, 31, 39, 47, 55, 63};
+		int[] removals = {7, 15, 23, 31, 39, 47, 55, 63};
 		int i, count = 0, j;
 
 		// retain the proper bytes
 		for(i = 0; i < 64; i ++)
 		{
-			if(removals.contains(i))
+			if(i == 7 || i == 15 || i == 23 || i == 31 || i == 39 || 
+				i == 47 || i == 55 || i == 63)
 				continue;
 			else
 			{
@@ -132,7 +136,7 @@ public class DES {
 				2,1,2,2,
 				2,2,1};
 
-		byte[][] keyArray = new byte[16][48];
+		byte[][] keyArray = new byte[16][_keyLen];
 
 		for(i = 0; i < shifts.length; i ++)
 			keyArray[0][i] = combinedKey[i];
@@ -141,24 +145,24 @@ public class DES {
 		{
 			combinedKey = generateShiftKey(shifts[i], combinedKey);
 
-			for(j = 0; j < 48; j ++)
+			for(j = 0; j < _keyLen; j ++)
 				keyArray[i][j] = combinedKey[j];
 		}
 
 		return keyArray;
 	}
 
-	private void applyOperations(FileInputStream fs, PrintWriter fw, byte[][] keyArray){
+	private void applyOperations(FileInputStream fs, PrintWriter fw, byte[][] keyArray) throws Exception {
 
-		Arraylist <String> blockList = new Arraylist <String>();
+		ArrayList <String> blockList = new ArrayList <String>();
 		byte next;
-		int count, index = 0;
-		while((next = fs.read()) != null) {
+		int count = 0, index = 0;
+		while((next = (byte) fs.read()) != -1) {
 			count = (count + 1) % _keyLen;
 			if(count == 0){
 				index++;
 			}
-			blockList.set(index, blockList.get(index).concat((String) next));
+			blockList.set(index, blockList.get(index) + (byte) next);
 		}
 
 		String temp = blockList.get(index);
@@ -172,18 +176,17 @@ public class DES {
 
 
 		int size = blockList.size();
-		String temp;
 		for(int i = 0; i < size; i++){
 			temp = blockList.get(i);
 
 			for(int j = 0; j < _keyLen; j++)
-				fw.print("%X", temp.charAt(j) ^ keyArray[i % 16][j]);
+				fw.printf("%X", temp.charAt(j) ^ keyArray[i % 16][j]);
 
 			fw.println();
 		}
 	}
 
-	public static void decrypt(String[] args) {
+	public  void decrypt(String[] args) throws Exception {
 		FileInputStream fs = openInputFile(args[1]);
 		PrintWriter fw = openOutputFile(args[2]);
 
@@ -192,11 +195,11 @@ public class DES {
 		applyOperations(fs, fw, keyArray);
 	}
 
-	public static void generateDES() {
+	public void generateDES() {
 		// may have to worry about signedness issues. We shall see.
 		long time = System.currentTimeMillis(), point, time2;
 		Point pt = MouseInfo.getPointerInfo().getLocation();
-		point = pt.getY() * (1 + pt.getY());
+		point = (long) (pt.getY() * (1 + pt.getY()));
 		time *= time ^ point;
 
 		// don't refactor the pow operations. They're there so time2 has enough
