@@ -70,17 +70,8 @@ public class DES {
 
 		try {
 			fw = new PrintWriter(filename, "UTF-8");
-<<<<<<< HEAD
 			return fw;
 		} catch (Exception e)
-=======
-
-			return fw;
-
-
-		} catch (Excepton e)
-
->>>>>>> FETCH_HEAD
 		{
 			System.out.println("Failed to open output file");
 			exit();
