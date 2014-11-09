@@ -70,12 +70,8 @@ public class DES {
 
 		try {
 			fw = new PrintWriter(filename, "UTF-8");
-<<<<<<< Updated upstream
 			return fw;
 		} catch (Exception e)
-=======
-		} catch (Excepton e)
->>>>>>> Stashed changes
 		{
 			System.out.println("Failed to open output file");
 			exit();
