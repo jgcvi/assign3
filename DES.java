@@ -6,7 +6,7 @@ import java.io.File;
 public class DES {
 	int _keyLen = 56;
 
-	public  void main(String []args) throws Exception {
+	public static void main(String []args) throws Exception {
 		if(args.length < 1)
 			exit();
 
@@ -51,7 +51,7 @@ public class DES {
 		}
 	}
 
-	void exit() {
+	static void exit() {
 		System.out.println("Type 'java DES -h' for help\n");
 		System.exit(1);
 	}
@@ -195,7 +195,7 @@ public class DES {
 		applyOperations(fs, fw, keyArray);
 	}
 
-	public void generateDES() {
+	public static void generateDES() {
 		// may have to worry about signedness issues. We shall see.
 		long time = System.currentTimeMillis(), point, time2;
 		Point pt = MouseInfo.getPointerInfo().getLocation();
