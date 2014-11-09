@@ -62,6 +62,8 @@ public class DES {
 		byte[][] keyArray = getAllKeys(args[0]);
 		System.out.println("HERE2");
 		applyOperations(fs, fw, keyArray);
+		fw.close();
+		fs.close();
 		System.out.println("HERE3");
 	}
 
@@ -70,14 +72,8 @@ public class DES {
 
 		try {
 			fw = new PrintWriter(filename, "UTF-8");
-<<<<<<< HEAD
-			return fw;
-=======
-			fw.println("hello");
 			return fw;
 
-
->>>>>>> FETCH_HEAD
 		} catch (Exception e)
 		{
 			System.out.println("Failed to open output file");
@@ -230,6 +226,6 @@ public class DES {
 		time2 = System.currentTimeMillis();
 		time ^= time2;
 
-		System.out.printf("%X", time);
+		System.out.printf("%X\n", time);
 	}
 }
