@@ -60,7 +60,7 @@ public class DES {
 		PrintWriter fw = openOutputFile(args[2]);
 
 		byte[][] keyArray = getAllKeys(args[0]);
-		System.out.println("HERE2");
+		System.out.println("HERE2: " + keyArray[0][0]);
 		applyOperations(fs, fw, keyArray);
 		fw.close();
 		fs.close();
@@ -117,18 +117,19 @@ public class DES {
 	}
 
 	static byte[][] getAllKeys(String key) {
-		byte[] combinedKey = new byte[56];
+		byte[] combinedKey = new byte[_keyLen];
 		int[] removals = {7, 15, 23, 31, 39, 47, 55, 63};
 		int i, count = 0, j;
 
 		// retain the proper bytes
 		for(i = 0; i < _keyLen; i ++)
 		{
-			if(i == 7 || i == 15 || i == 23 || i == 31 || i == 39 || 
+		/*	if(i == 7 || i == 15 || i == 23 || i == 31 || i == 39 || 
 				i == 47 || i == 55 || i == 63)
 				continue;
-			else
+			else*/
 			{
+				System.out.print(key.charAt(i));
 				combinedKey[count] = (byte) key.charAt(i);
 				count ++;
 			}
@@ -160,9 +161,63 @@ public class DES {
 		byte next;
 		int count = -1, index = -1;
 		try {
-			while((next = (byte) fs.read()) != -1) {
-				count = (count + 1) % _keyLen;
-				if(count == 0){
+			while((next = (byte) fs.read()) != -1 && count ++ > -2) {
+				if(count % _keyLen == 0){
+					index++;
+					blockList.add("");
+				}
+				blockList.set(index, blockList.get(index) + (char) next);
+			}
+		} catch(Exception e){
+			e.printStackTrace(System.out);
+		}
+
+		String temp = blockList.get(index);
+		count = count % _keyLen;
+		System.out.println(count);
+		while(count < _keyLen && count != 0)
+		{
+			temp = "0" + temp;
+			count++;
+		}
+
+		
+		blockList.set(index, temp);
+		
+		for(int i = 0; i < blockList.size(); i ++)
+		{
+			System.out.println(blockList.get(i));
+		}
+
+		int size = blockList.size();
+		for(int i = 0; i < size; i++){
+			temp = blockList.get(i);
+
+
+			for(int j = 0; j < _keyLen; j++)
+			{
+				//System.out.printf("%X", temp.charAt(j) ^ keyArray[i % 16][j]);
+				try {
+				//	System.out.printf("%c xor %c is %c", temp.charAt(j), keyArray[i % 16][j], temp.charAt(j) ^ keyArray[i%16][j]);
+					fw.printf("%X", temp.charAt(j) ^ keyArray[i % 16][j]);
+				} catch(Exception e){
+					e.printStackTrace(System.out);
+				}
+			}
+	//		System.out.println(temp.length());
+	//		System.out.println(blockList.size());
+			System.out.println();
+			fw.println();
+		}
+	}
+
+	static void decApplyOperations(FileInputStream fs, PrintWriter fw, byte[][] keyArray) {
+		ArrayList <String> blockList = new ArrayList <String>();
+		byte next;
+		int count = -1, index = -1;
+		try {
+			while((next = (byte) fs.read()) != -1 && count ++ > -2) {
+				if(count % _keyLen == 0){
 					index++;
 					blockList.add("");
 				}
@@ -173,29 +228,33 @@ public class DES {
 		}
 
 		String temp = blockList.get(index);
-		while(count < _keyLen && count != 0)
-		{
-			temp = "0".concat(temp);
-			count++;
-		}
-
+		count = count % _keyLen;
+		System.out.println(count);
+		
 		blockList.set(index, temp);
-
+		
+		for(int i = 0; i < blockList.size(); i ++)
+		{
+			System.out.println(blockList.get(i));
+		}
 
 		int size = blockList.size();
 		for(int i = 0; i < size; i++){
 			temp = blockList.get(i);
 
+
 			for(int j = 0; j < _keyLen; j++)
 			{
-				System.out.printf("%X", temp.charAt(j) ^ keyArray[i % 16][j]);
+				//System.out.printf("%X", temp.charAt(j) ^ keyArray[i % 16][j]);
 				try {
-					fw.printf("%X", temp.charAt(j) ^ keyArray[i % 16][j]);
+					fw.printf("%c", temp.charAt(j) ^ keyArray[i % 16][j]);
 				} catch(Exception e){
 					e.printStackTrace(System.out);
 				}
 			}
-			System.out.println();
+	//		System.out.println(temp.length());
+	//		System.out.println(blockList.size());
+	//		System.out.println();
 			fw.println();
 		}
 	}
@@ -206,7 +265,11 @@ public class DES {
 
 		byte[][] keyArray = getAllKeys(args[0]);
 
-		applyOperations(fs, fw, keyArray);
+
+
+		decApplyOperations(fs, fw, keyArray);
+		fw.close();
+		fs.close();
 	}
 
 	public static void generateDES() {

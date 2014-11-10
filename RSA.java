@@ -18,12 +18,12 @@ public static void main(String []args) {
 			exit();
 		else generateKey(arguments);
 
-	} else if(args.length == 5)
+	} else if(args.length == 6)
 	{
 		boolean encrypt = false;
 		int i;
 		String[] arguments = {null, null, null};
-		for(i = 0; i < 5; i += 2)
+		for(i = 0; i < 6; i += 2)
 		{
 			if(args[i].equals("-e"))
 			{
