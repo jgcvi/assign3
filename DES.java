@@ -1,6 +1,7 @@
 import java.awt.*;
 import java.util.ArrayList;
 import java.io.*;
+import java.util.BitSet;
 
 import java.io.File;
 public class DES {
@@ -46,6 +47,7 @@ public class DES {
 			else
 				decrypt(arguments);
 		}
+		else exit();
 	}
 
 	static void exit() {
@@ -198,7 +200,7 @@ public class DES {
 			{
 				//System.out.printf("%X", temp.charAt(j) ^ keyArray[i % 16][j]);
 				try {
-				//	System.out.printf("%c xor %c is %c", temp.charAt(j), keyArray[i % 16][j], temp.charAt(j) ^ keyArray[i%16][j]);
+					System.out.printf("%c xor %c is %c", temp.charAt(j), keyArray[i % 16][j], temp.charAt(j) ^ keyArray[i%16][j]);
 					fw.printf("%X", temp.charAt(j) ^ keyArray[i % 16][j]);
 				} catch(Exception e){
 					e.printStackTrace(System.out);
@@ -227,27 +229,27 @@ public class DES {
 			e.printStackTrace(System.out);
 		}
 
-		String temp = blockList.get(index);
-		count = count % _keyLen;
-		System.out.println(count);
-		
-		blockList.set(index, temp);
-		
 		for(int i = 0; i < blockList.size(); i ++)
 		{
 			System.out.println(blockList.get(i));
 		}
+		System.out.println("\n");
+		String temp, hexStr;
 
-		int size = blockList.size();
-		for(int i = 0; i < size; i++){
+		for(int i = 0; i < blockList.size(); i++){
 			temp = blockList.get(i);
-
+			int convert, strJump = 0;
 
 			for(int j = 0; j < _keyLen; j++)
 			{
 				//System.out.printf("%X", temp.charAt(j) ^ keyArray[i % 16][j]);
 				try {
-					fw.printf("%c", temp.charAt(j) ^ keyArray[i % 16][j]);
+					hexStr = temp.substring(strJump, strJump + 2);
+					convert = Integer.parseInt(hexStr);
+					strJump +=2;
+
+					System.out.println("Converted str is " + (char) convert);
+					fw.printf("%c", convert ^ keyArray[i % 16][j]);
 				} catch(Exception e){
 					e.printStackTrace(System.out);
 				}
@@ -264,8 +266,6 @@ public class DES {
 		PrintWriter fw = openOutputFile(args[2]);
 
 		byte[][] keyArray = getAllKeys(args[0]);
-
-
 
 		decApplyOperations(fs, fw, keyArray);
 		fw.close();
