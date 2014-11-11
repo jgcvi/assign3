@@ -79,10 +79,13 @@ public class RSA {
 	 * exp = e (encryption, global) or d (decryption, private key)
 	 */
 	static String cipher(String msg, BigInteger modulus, BigInteger exp) {
-		System.out.println(msg);
-		BigInteger convertedMsg = new BigInteger(msg);
-		String ret = convertedMsg.modPow(modulus, exp).toString();
-		System.out.println(ret);
+		BigInteger convertedMsg;
+		// handling decryption differences
+		convertedMsg = new BigInteger(msg.getBytes());
+
+		//System.out.println(convertedMsg);
+		String ret = convertedMsg.modPow(exp, modulus).toString();
+		//System.out.println(ret);
 		return ret;
 	}
 
@@ -107,14 +110,17 @@ public class RSA {
 			}
 		} catch(IOException e) {};
 
+//		keep this in case you need to care about newlines later
+//		payload.set(listIndex, payload.get(listIndex).substring(0,payload.get(listIndex).length() - 1));
 		System.out.println("hello");
 		// padding on the last payload
 		if(strIndex > 0)
 			while(strIndex < (keyLength / 2))
 			{
-				payload.set(listIndex, payload.get(listIndex) + '0');
+				payload.set(listIndex, '0' + payload.get(listIndex));
 				strIndex ++;
 			}
+
 		return payload;
 	}
 
@@ -129,8 +135,18 @@ public class RSA {
 				keyBuilder.append(next);
 			
 		} catch(IOException e) {};
-		System.out.println(keyBuilder.toString());
+
 		return keyBuilder.toString();
+	}
+
+	static String convertToAscii(String str) {
+		char[] conversion = new char[str.length() / 2];
+		for(int i = 0; i < str.length() - 2; i += 2)
+		{
+			conversion[i / 2] = (char) Integer.parseInt(str.substring(i, i + 2));
+		}
+
+		return String.copyValueOf(conversion);
 	}
 
 	// commented inline, method header later
@@ -145,10 +161,18 @@ public class RSA {
 		FileInputStream input_fs = openInputFile(args[1]);
 		ArrayList<String> payload = getPayloads(input_fs, key.length());
 
+		//testing
+		for(int i = 0; i < payload.size(); i ++)
+			System.out.println("--> " + i + ": " + payload.get(i));
+
 		// writes the encoded text into the output file
 		PrintWriter output_fw = openOutputFile(args[2]);
 		for(String msg : payload)
-			output_fw.write(cipher(msg, bigKey, e));
+		{
+			String cipher = cipher(msg, bigKey, e);
+			String utfCipher = convertToAscii(cipher);
+			output_fw.write(utfCipher);
+		}
 
 		output_fw.close();
 	}
@@ -171,7 +195,17 @@ public class RSA {
 		// writes the encoded text into the output file
 		PrintWriter output_fw = openOutputFile(args[2]);
 		for(String msg : payload)
-			output_fw.write(cipher(msg, bigKey, n));
+		{
+			String cipher = cipher(msg, n, bigKey);
+			String utfCipher = convertToAscii(cipher);
+			output_fw.write(utfCipher);
+		}
+
+		try{
+			output_fw.close();
+			input_fs.close();
+		}
+		catch(Exception e){}
 	}
 
 	// uses randomness from system and oddity
@@ -229,6 +263,7 @@ public class RSA {
 		possiblePrime_q = BigInteger.probablePrime(Integer.parseInt(args[1]) / 2, rnd),
 		possiblePrime_p = BigInteger.probablePrime(Integer.parseInt(args[1]) / 2, rnd);
 
+		System.out.println("P: " + possiblePrime_p + "\nQ: " + possiblePrime_q);
 		// file set up
 		String pubf = args[0].concat(".public");
 		String privf = args[0].concat(".private");
@@ -239,8 +274,9 @@ public class RSA {
 		public_key = possiblePrime_q.multiply(possiblePrime_p);
 
 		// calculate the private key
-		totient = public_key.subtract(possiblePrime_p).add(possiblePrime_q).subtract(BigInteger.ONE);
+		totient = ((possiblePrime_p).subtract(BigInteger.ONE)).multiply((possiblePrime_q).subtract(BigInteger.ONE));
 		private_key = public_key.modInverse(totient);
+		System.out.println(private_key);
 
 		// write them both to file and close
 		pub_fw.write(public_key.toString(16));
