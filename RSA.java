@@ -2,6 +2,7 @@ import java.lang.StringBuilder;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.Base64.Encoder;
 import java.awt.*;
 import java.io.*;
 
