@@ -1,7 +1,6 @@
 import java.awt.*;
 import java.util.ArrayList;
 import java.io.*;
-import java.util.BitSet;
 
 import java.io.File;
 public class DES {
@@ -13,7 +12,7 @@ public class DES {
 
 		if(args[0].equals("-h") && args.length == 1)
 		{
-			System.out.println("java DES -h\njava DES -k\njava DES -e <64_bit_key_in_hex> -i <input_file> -o <output_file>\njava DES -d <64_bit_key_in_hex> -i <input_file> -o <output_file>\n");
+			System.out.printf("java DES -h\njava DES -k\njava DES -e <64_bit_key_in_hex> -i <input_file> -o <output_file>\njava DES -d <64_bit_key_in_hex> -i <input_file> -o <output_file>\n");
 			return;
 		} else if(args[0].equals("-k") && args.length == 1)
 		{
@@ -56,17 +55,13 @@ public class DES {
 	}
 
 	static void encrypt(String[] args) throws Exception{
-
-		System.out.println("HERE");
 		FileInputStream fs = openInputFile(args[1]);
 		PrintWriter fw = openOutputFile(args[2]);
-
 		byte[][] keyArray = getAllKeys(args[0]);
-		System.out.println("HERE2: " + keyArray[0][0]);
+
 		applyOperations(fs, fw, keyArray);
 		fw.close();
 		fs.close();
-		System.out.println("HERE3");
 	}
 
 	static PrintWriter openOutputFile(String filename) {
@@ -200,7 +195,8 @@ public class DES {
 			{
 				//System.out.printf("%X", temp.charAt(j) ^ keyArray[i % 16][j]);
 				try {
-					System.out.printf("%c xor %c is %c", temp.charAt(j), keyArray[i % 16][j], temp.charAt(j) ^ keyArray[i%16][j]);
+					System.out.printf("%c xor %c is %x", temp.charAt(j), keyArray[i % 16][j], 
+						temp.charAt(j) ^ keyArray[i%16][j]);
 					fw.printf("%X", temp.charAt(j) ^ keyArray[i % 16][j]);
 				} catch(Exception e){
 					e.printStackTrace(System.out);
@@ -219,9 +215,20 @@ public class DES {
 		int count = -1, index = -1;
 		try {
 			while((next = (byte) fs.read()) != -1 && count ++ > -2) {
-				if(count % _keyLen == 0){
+				if(count % (_keyLen * 2) == 0){
 					index++;
 					blockList.add("");
+				}
+
+				if((byte) next == 10 && count == 63)
+				{
+					count --;
+					continue;
+				}
+				else if(blockList.get(index).equals("10"))
+				{
+					blockList.set(index, "");
+					count --;
 				}
 				blockList.set(index, blockList.get(index) + (byte) next);
 			}
@@ -229,35 +236,48 @@ public class DES {
 			e.printStackTrace(System.out);
 		}
 
-		for(int i = 0; i < blockList.size(); i ++)
-		{
-			System.out.println(blockList.get(i));
-		}
-		System.out.println("\n");
 		String temp, hexStr;
 
+		System.out.println("blocklist length: " + blockList.get(1));
 		for(int i = 0; i < blockList.size(); i++){
 			temp = blockList.get(i);
 			int convert, strJump = 0;
+			String concat = "";
+	//		int j = 0;
 
 			for(int j = 0; j < _keyLen; j++)
 			{
 				//System.out.printf("%X", temp.charAt(j) ^ keyArray[i % 16][j]);
 				try {
-					hexStr = temp.substring(strJump, strJump + 2);
-					convert = Integer.parseInt(hexStr);
-					strJump +=2;
 
-					System.out.println("Converted str is " + (char) convert);
-					fw.printf("%c", convert ^ keyArray[i % 16][j]);
+					for(int k = 0; k < 2; k ++)
+					{
+//						if(concat.length() == 2)
+//						{
+//							j = 0;
+//							break;
+//						}
+						hexStr = temp.substring(strJump, strJump + 2);
+						convert = Integer.parseInt(hexStr);
+//						if((char)convert != '\n')
+							concat = concat + (char)convert;
+						strJump +=2;
+					}
+
+//					if(concat.length() == 2)
+//					{
+						System.out.printf("%x xor %c is %c\n", Integer.parseInt(concat,16), 
+							keyArray[i % 16][j], Integer.parseInt(concat,16) ^ keyArray[i % 16][j]);
+							//you need to store the hex value in concat;
+						fw.write((char)(Integer.parseInt(concat,16) ^ keyArray[i % 16][j]));
+						concat = "";
+//					}
+//					System.out.println("Converted str is " + (char) convert);
+		//			fw.printf("%c", convert ^ keyArray[i % 16][j]);
 				} catch(Exception e){
 					e.printStackTrace(System.out);
 				}
 			}
-	//		System.out.println(temp.length());
-	//		System.out.println(blockList.size());
-	//		System.out.println();
-			fw.println();
 		}
 	}
 
