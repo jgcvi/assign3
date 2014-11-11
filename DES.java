@@ -78,6 +78,7 @@ public class DES {
 		}
 		return null;
 	}
+	
 	static FileInputStream openInputFile(String filename) {
 		FileInputStream fs;
 
