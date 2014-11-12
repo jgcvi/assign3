@@ -557,8 +557,6 @@ public class DES {
 		}
 	}
 
-<<<<<<< HEAD
-=======
 	/*-------------------------------------------------------------------------------------
 	 |	Purpose:	this iterates through the textfile, getting all the proper sized
 	 |				blocks. 
@@ -605,7 +603,6 @@ public class DES {
 			}
 
 		return blocks;
->>>>>>> FETCH_HEAD
 	static BitSet pBoxPermutation(BitSet key56) {
 		BitSet ret = new BitSet(56);
 		byte[] keyArr = key.toByteArray();
@@ -805,10 +802,6 @@ public class DES {
 		// expands the 32 bit key into 48 bits
 		BitSet expansion = expansionPermutation(right32);
 
-<<<<<<< HEAD
-
-=======
->>>>>>> FETCH_HEAD
 		String temp = blockList.get(index);
 		count = count % _keyLen;
 		System.out.println(count);
@@ -821,10 +814,6 @@ public class DES {
 		// xors the expansion with the 48 bit key
 		BitSet sBoxFeed = key_i.xor(expansion);
 		long lookup;
-<<<<<<< HEAD
-
-=======
->>>>>>> FETCH_HEAD
 
 		// perform S-Box substitution
 		for(i = 0; i < 8; i ++)
