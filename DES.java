@@ -9,6 +9,7 @@ public class DES {
 	public static BitSet initial64 = new BitSet(64);
 	public static BitSet key56 = new BitSet(56);
 	static int _keyLen = 16;
+	BitSet[] allKeys = new BitSet[16];
 
 	static int box1[][] = new int[][]{
 		{14,4,13,1,2,15,11,8,3,10,6,12,5,9,0,7},
@@ -116,9 +117,9 @@ public class DES {
 
 
 	// returns a 64 bit key
-	static BitSet initPermutation(BitSet key) {
+	static BitSet initPermutation(BitSet key64) {
 		BitSet ret = new BitSet();
-		byte[] keyArr = key.toByteArray();
+		byte[] keyArr = key64.toByteArray();
 
 		int setIndex;
 		for(int i = 0; i < keyArr.length; i ++)
@@ -201,12 +202,59 @@ public class DES {
 		return ret;
 	}
 
+	// returns a 48 bit key
+	static BitSet expansionPermutation(BitSet key36) {
+		BitSet ret = new BitSet(64);
+		byte[] keyArr = key36.toByteArray();
+
+		for(int i = 0; i < key.length; i ++)
+		{
+			switch(keyArr[i])
+			{
+				case 0: ret.set(1); ret.set(47); break;
+				case 1: ret.set(2); break;
+				case 2: ret.set(3); break;
+				case 3: ret.set(4); ret.set(6); break;
+				case 4: ret.set(5); ret.set(7); break;
+				case 5: ret.set(8); break;
+				case 6: ret.set(9); break;
+				case 7: ret.set(10); ret.set(12); break;
+				case 8: ret.set(11); ret.set(13); break;
+				case 9: ret.set(14); break;
+				case 10: ret.set(15); break;
+				case 11: ret.set(16); ret.set(18); break;
+				case 12: ret.set(17); ret.set(19); break;
+				case 13: ret.set(20); break;
+				case 14: ret.set(21); break;
+				case 15: ret.set(22); ret.set(24); break;
+				case 16: ret.set(23); ret.set(25); break;
+				case 17: ret.set(26); break;
+				case 18: ret.set(27); break;
+				case 19: ret.set(28); ret.set(30); break;
+				case 20: ret.set(29); ret.set(31); break;
+				case 21: ret.set(32); break;
+				case 22: ret.set(33); break;
+				case 23: ret.set(34); ret.set(36); break;
+				case 24: ret.set(35); ret.set(37); break;
+				case 25: ret.set(38);
+				case 26: ret.set(39);
+				case 27: ret.set(40); ret.set(42); break;
+				case 28: ret.set(41); ret.set(43); break;
+				case 29: ret.set(44); break;
+				case 30: ret.set(45); break;
+				case 31: ret.set(46); ret.set(0); break;
+			}
+		}
+	}
+
 	static int[] getIndices(BitSet lookUp) {
 		int[] ret = new int[] {0, 0};
+	
 		if(lookUp.get(5) == true)
 			ret[0] += 2;
 		if(lookUp.get(0) == true)
 			ret[0] += 1;
+
 		if(lookUp.get(1) == true)
 			ret[1] += 1;
 		if(lookUp.get(2) == true)
@@ -318,7 +366,8 @@ public class DES {
 		}
 	}
 
-	static BitSet permutatedChoice_1(BitSet key){
+	// returns a 56 bit key
+	static BitSet permutatedChoice_1(BitSet key64){
 		BitSet ret = new BitSet(56);
 		byte[] keyArr = key.toByteArray();
 
@@ -444,7 +493,7 @@ public class DES {
 		return ret;
 	}
 
-	static BitSet permutatedChoice_2(BitSet key) {
+	static BitSet permutatedChoice_2(BitSet key56) {
 		BitSet ret = new BitSet(48);
 		byte[] keyArr = key.toByteArray();
 
@@ -508,6 +557,7 @@ public class DES {
 		}
 	}
 
+<<<<<<< HEAD
 	/*-------------------------------------------------------------------------------------
 	 |	Purpose:	this iterates through the textfile, getting all the proper sized
 	 |				blocks. 
@@ -554,7 +604,79 @@ public class DES {
 			}
 
 		return blocks;
+=======
+	static BitSet pBoxPermutation(BitSet key56) {
+		BitSet ret = new BitSet(56);
+		byte[] keyArr = key.toByteArray();
 
+		int setIndex;
+		for(int i = 0; i < keyArr.length; i ++)
+		{
+			setIndex = 0;
+			switch(keyArr[i]) {
+				case 24: setIndex ++;
+				case 3: setIndex ++;
+				case 10: setIndex ++;
+				case 21: setIndex ++;
+				case 5: setIndex ++;
+				case 29: setIndex ++;
+				case 12: setIndex ++;
+				case 18: setIndex ++;
+				case 8: setIndex ++;
+				case 2: setIndex ++;
+				case 26: setIndex ++;
+				case 31: setIndex ++;
+				case 13: setIndex ++;
+				case 23: setIndex ++;
+				case 7: setIndex ++;
+				case 1: setIndex ++;
+				case 9: setIndex ++;
+				case 30: setIndex ++;
+				case 17: setIndex ++;
+				case 4: setIndex ++;
+				case 25: setIndex ++;
+				case 22: setIndex ++;
+				case 14: setIndex ++;
+				case 0: setIndex ++;
+				case 16: setIndex ++;
+				case 27: setIndex ++;
+				case 11: setIndex ++;
+				case 28: setIndex ++;
+				case 20: setIndex ++;
+				case 19: setIndex ++;
+				case 6: setIndex ++;
+				case 15: 
+					ret.set(setIndex);
+					break;
+			}
+		}
+
+		return ret;
+	}
+
+	static BitSet shift(int shift, BitSet key28) {
+
+	}
+
+	static BitSet[] getAllKeys(BitSet key64) {
+		BitSet[] keys = new BitSet[16];
+		BitSet stage1, stage2, left, right;
+		keys[0] = key56;
+
+		int[] shifts = new int[] {
+			1,1,2,2,
+			2,2,2,2
+			1,2,2,2
+			2,2,2,1 };
+		for(int i = 1; i < 16; i ++)
+		{
+			stage1 = permutatedChoice_1(keys[i-1]);
+			left = shift(shifts[i], stage1.set(0, 27));
+			right = shift(shifts[i], stage1.set(28,55));
+>>>>>>> FETCH_HEAD
+
+			keys[i] = permutatedChoice2(left.xor(right));
+		}
 	}
 
 	/*-------------------------------------------------------------------------------------
@@ -574,18 +696,19 @@ public class DES {
 	static void encrypt(String[] args) throws Exception{
 		PrintWriter fw = openOutputFile(args[2]);
 
-		// get blocks from file
+		// get keys needed
+		initial64 = BitSet.valueOf(new long[] {Long.parseLong(args[0])});
+		key56 = initPermutation(initial64);
+		allKeys = getAllKeys(key56);
+
+		// get messageBlocks
 		FileInputStream fs = openInputFile(args[1]);
 		ArrayList<String> blocks = getBlocks(fs);
-		fs.close();
 
-		// get keys needed
-		initial64 = BitSet.valueOf(new long[] {Long.parseLong(key)});
-		key56 = initPermutation(initial64);
-		BitSet[] keyArray = getAllKeys(key56);
+		// apply the perumtation functions on each block, with each key and write
+		for(String msg : blocks)
+			fw.write(fiestelFlow(msg));
 
-		// apply the perumtation functions on each block, with each key
-		encryptOperations(blocks, fw, keyArray);
 		fw.close();
 	}
 
@@ -675,70 +798,13 @@ public class DES {
 		return BitSet.valueOf(leftArr).or(BitSet.valueOf(rightArr));
 	}
 
-	// worry about this later
-	static BitSet[] getAllKeys(BitSet key) {
-		BitSet[] allKeys = new BitSet[16];
-		allKeys[0] = key;
-		for(int i = 1; i < 16; i ++)
-		{
-			allKeys[i] = keySchedule(allKeys[i-1]);
-		}
-		// byte[] combinedKey = new byte[_keyLen];
-		// int[] removals = {7, 15, 23, 31, 39, 47, 55, 63};
-		// int i, count = 0, j;
+	static BitSet fiestelFn(BitSet right32, BitSet key_i) {
+		BitSet ret32 = new BitSet(32);
 
-		// // retain the proper bytes
-		// for(i = 0; i < _keyLen; i ++)
-		// {
-		// /*	if(i == 7 || i == 15 || i == 23 || i == 31 || i == 39 || 
-		// 		i == 47 || i == 55 || i == 63)
-		// 		continue;
-		// 	else*/
-		// 	{
-		// 		System.out.print(key.charAt(i));
-		// 		combinedKey[count] = (byte) key.charAt(i);
-		// 		count ++;
-		// 	}
-		// }
+		// expands the 32 bit key into 48 bits
+		BitSet expansion = expansionPermutation(right32);
 
-		// int[] shifts = {1,1,2,2,
-		// 		2,2,2,2,
-		// 		2,1,2,2,
-		// 		2,2,1};
-
-		// byte[][] keyArray = new byte[16][_keyLen];
-
-		// for(i = 0; i < shifts.length; i ++)
-		// 	keyArray[0][i] = combinedKey[i];
-
-		// for(i = 1; i < shifts.length; i ++)
-		// {
-		// 	combinedKey = generateShiftKey(shifts[i], combinedKey);
-
-		// 	for(j = 0; j < _keyLen; j ++)
-		// 		keyArray[i][j] = combinedKey[j];
-		// }
-
-		// return keyArray;
-	}
-
-	// no bueno currently
-	static void applyOperations(FileInputStream fs, PrintWriter fw, byte[][] keyArray) {
-		ArrayList <String> blockList = new ArrayList <String>();
-		byte next;
-		int count = -1, index = -1;
-		try {
-			while((next = (byte) fs.read()) != -1 && count ++ > -2) {
-				if(count % _keyLen == 0){
-					index++;
-					blockList.add("");
-				}
-				blockList.set(index, blockList.get(index) + (char) next);
-			}
-		} catch(Exception e){
-			e.printStackTrace(System.out);
-		}
-
+<<<<<<< HEAD
 		String temp = blockList.get(index);
 		count = count % _keyLen;
 		System.out.println(count);
@@ -747,124 +813,61 @@ public class DES {
 			temp = "0" + temp;
 			count++;
 		}
+=======
+		// xors the expansion with the 48 bit key
+		BitSet sBoxFeed = key_i.xor(expansion);
+		long lookup;
+>>>>>>> FETCH_HEAD
 
-		
-		blockList.set(index, temp);
-		
-		for(int i = 0; i < blockList.size(); i ++)
+		// perform S-Box substitution
+		for(i = 0; i < 8; i ++)
 		{
-			System.out.println(blockList.get(i));
+			lookup = (long) sBoxLookUp(sBoxFeed.set(i * 6, (i+1) * 6), i) << (4*i);
+			ret32.valueOf(new long[] {lookup});
 		}
 
-		int size = blockList.size();
-		for(int i = 0; i < size; i++){
-			temp = blockList.get(i);
-
-
-			for(int j = 0; j < _keyLen; j++)
-			{
-				//System.out.printf("%X", temp.charAt(j) ^ keyArray[i % 16][j]);
-				try {
-					System.out.printf("%c xor %c is %x", temp.charAt(j), keyArray[i % 16][j], 
-						temp.charAt(j) ^ keyArray[i%16][j]);
-					fw.printf("%X", temp.charAt(j) ^ keyArray[i % 16][j]);
-				} catch(Exception e){
-					e.printStackTrace(System.out);
-				}
-			}
-		//		System.out.println(temp.length());
-		//		System.out.println(blockList.size());
-			System.out.println();
-			fw.println();
-		}
+		// returns the pBox permutation of the S-Box substitution
+		return pBoxPermutation(ret32);
 	}
 
-	// no bueno currently
-	static void decApplyOperations(FileInputStream fs, PrintWriter fw, byte[][] keyArray) {
-		ArrayList <String> blockList = new ArrayList <String>();
-		byte next;
-		int count = -1, index = -1;
-		try {
-			while((next = (byte) fs.read()) != -1 && count ++ > -2) {
-				if(count % (_keyLen * 2) == 0){
-					index++;
-					blockList.add("");
-				}
+	static String fiestelFlow(String text) {
+		BitSet[][] fiestelRound = new BitSet[16][],
+			textBits = BitSet.valueOf(text.toByteArray()),
+			left32 = new BitSet(32) right32 = new BitSet(32);
 
-				if((byte) next == 10 && count == 63)
-				{
-					count --;
-					continue;
-				}
-				else if(blockList.get(index).equals("10"))
-				{
-					blockList.set(index, "");
-					count --;
-				}
-				blockList.set(index, blockList.get(index) + (byte) next);
-			}
-		} catch(Exception e){
-			e.printStackTrace(System.out);
+		fiestelRound[0][0] = left;
+		fiestelRound[0][1] = right;
+
+
+		for(int i = 1; i < 16; i ++)
+		{
+			left32 = fiestelRound[i-1][0];
+			right32 = fiestelRound[i-1][1];
+
+			fiestelRound[i][0] = right32;
+			fiestelRound[i][1] = fiestelFn(right32, allKeys[i]);
 		}
 
-		String temp, hexStr;
-
-		System.out.println("blocklist length: " + blockList.get(1));
-		for(int i = 0; i < blockList.size(); i++){
-			temp = blockList.get(i);
-			int convert, strJump = 0;
-			String concat = "";
-		//		int j = 0;
-
-			for(int j = 0; j < _keyLen; j++)
-			{
-				//System.out.printf("%X", temp.charAt(j) ^ keyArray[i % 16][j]);
-				try {
-
-					for(int k = 0; k < 2; k ++)
-					{
-			//						if(concat.length() == 2)
-			//						{
-			//							j = 0;
-			//							break;
-			//						}
-						hexStr = temp.substring(strJump, strJump + 2);
-						convert = Integer.parseInt(hexStr);
-			//						if((char)convert != '\n')
-							concat = concat + (char)convert;
-						strJump +=2;
-					}
-
-			//					if(concat.length() == 2)
-			//					{
-						System.out.printf("%x xor %c is %c\n", Integer.parseInt(concat,16), 
-							keyArray[i % 16][j], Integer.parseInt(concat,16) ^ keyArray[i % 16][j]);
-							//you need to store the hex value in concat;
-						fw.write((char)(Integer.parseInt(concat,16) ^ keyArray[i % 16][j]));
-						concat = "";
-			//					}
-			//					System.out.println("Converted str is " + (char) convert);
-			//			fw.printf("%c", convert ^ keyArray[i % 16][j]);
-				} catch(Exception e){
-					e.printStackTrace(System.out);
-				}
-			}
-		}
+		return fiestelRound[15][1].or(fiestelRound[15][0]);
 	}
 
 	public static void decrypt(String[] args) throws Exception {
 		FileInputStream fs = openInputFile(args[1]);
 		PrintWriter fw = openOutputFile(args[2]);
 
-		byte[][] keyArray = getAllKeys(args[0]);
 
-		decApplyOperations(fs, fw, keyArray);
-		fw.close();
+		// get blocks from file
+		FileInputStream fs = openInputFile(args[1]);
+		ArrayList<String> blocks = getBlocks(fs);
 		fs.close();
-	}
 
-	static void generateInitialKey(String key) {
-		initialKey = BitSet.valueOf(new long[] {Long.parseLong(key)});
+		// get keys needed
+		initial64 = BitSet.valueOf(new long[] {Long.parseLong(key)});
+		key56 = finalPermutation(initial64);
+		BitSet[] keyArray = getAllKeys(key56);
+
+		decryptOperations(blocks, fw, keyArray);
+		fw.close();
 	}
 
 	/*-------------------------------------------------------------------------------------
