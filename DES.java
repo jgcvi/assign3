@@ -557,6 +557,55 @@ public class DES {
 		}
 	}
 
+<<<<<<< HEAD
+=======
+	/*-------------------------------------------------------------------------------------
+	 |	Purpose:	this iterates through the textfile, getting all the proper sized
+	 |				blocks. 
+	 |
+	 |	Pre-Cond:	the file exists, is a valid format, and that a command line file was 
+	 |				provided
+	 |
+	 |	Post-Cond:	The message is put into properly sized blocks, with consideration for
+	 |				the last one, padding being placed at the end of the block
+	 |
+	 |	Parameters:	fs:			the FileInputStream that is being read from, byte by byte
+	 |
+	 |	Returns:	ArrayList:	the ascii Strings that are read in
+	 |
+	 `-------------------------------------------------------------------------------------*/
+
+	static ArrayList<String> getBlocks(FileInputStream fs) {
+		ArrayList<String> blocks = new ArrayList<String>();
+		int listIndex = -1, strIndex = 0;
+		char next;
+
+		// this adds the proper blocks to the arraylist
+		try 
+		{
+			while((next = (char)fs.read()) != -1)
+			{
+				if(strIndex % ((_keyLen) - 1) == 0)
+				{
+					listIndex += 1;
+					blocks.add("");
+					strIndex = 0;
+				}
+				blocks.set(listIndex, blocks.get(listIndex) + next);
+				strIndex ++;
+			}
+		} catch(IOException e) {};
+
+		// padding on the last block
+		if(strIndex != 0)
+			while(strIndex < (_keyLen))
+			{
+				blocks.set(listIndex, blocks.get(listIndex) + '0');
+				strIndex ++;
+			}
+
+		return blocks;
+>>>>>>> FETCH_HEAD
 	static BitSet pBoxPermutation(BitSet key56) {
 		BitSet ret = new BitSet(56);
 		byte[] keyArr = key.toByteArray();
@@ -606,10 +655,6 @@ public class DES {
 		return ret;
 	}
 
-	static BitSet shift(int shift, BitSet key28) {
-
-	}
-
 	static BitSet[] getAllKeys(BitSet key64) {
 		BitSet[] keys = new BitSet[16];
 		BitSet stage1, stage2, left, right;
@@ -623,6 +668,9 @@ public class DES {
 		for(int i = 1; i < 16; i ++)
 		{
 			stage1 = permutatedChoice_1(keys[i-1]);
+			left = generateShiftKey(shifts[i], stage1.set(0, 27));
+			right = generateShiftKey(shifts[i], stage1.set(28,55));
+
 			left = shift(shifts[i], stage1.set(0, 27));
 			right = shift(shifts[i], stage1.set(28,55));
 
@@ -630,52 +678,7 @@ public class DES {
 		}
 	}
 
-		/*-------------------------------------------------------------------------------------
-	 |	Purpose:	this iterates through the textfile, getting all the proper sized
-	 |				blocks. 
-	 |
-	 |	Pre-Cond:	the file exists, is a valid format, and that a command line file was 
-	 |				provided
-	 |
-	 |	Post-Cond:	The message is put into properly sized blocks, with consideration for
-	 |				the last one, padding being placed at the end of the block
-	 |
-	 |	Parameters:	fs:			the FileInputStream that is being read from, byte by byte
-	 |
-	 |	Returns:	ArrayList:	the ascii Strings that are read in
-	 |
-	 `-------------------------------------------------------------------------------------*/
-
-	static ArrayList<String> getBlocks(FileInputStream fs) {
-		ArrayList<String> blocks = new ArrayList<String>();
-		int listIndex = -1, strIndex = 0;
-		char next;
-
-		// this adds the proper blocks to the arraylist
-		try 
-		{
-			while((next = (char)fs.read()) != -1)
-			{
-				if(strIndex % ((_keyLen) - 1) == 0)
-				{
-					listIndex += 1;
-					blocks.add("");
-					strIndex = 0;
-				}
-				blocks.set(listIndex, blocks.get(listIndex) + next);
-				strIndex ++;
-			}
-		} catch(IOException e) {};
-
-		// padding on the last block
-		if(strIndex != 0)
-			while(strIndex < (_keyLen))
-			{
-				blocks.set(listIndex, blocks.get(listIndex) + '0');
-				strIndex ++;
-			}
-
-		return blocks;
+	
 
 	/*-------------------------------------------------------------------------------------
 	 |	Purpose:	Performs/readies encryption steps. 
@@ -802,7 +805,10 @@ public class DES {
 		// expands the 32 bit key into 48 bits
 		BitSet expansion = expansionPermutation(right32);
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> FETCH_HEAD
 		String temp = blockList.get(index);
 		count = count % _keyLen;
 		System.out.println(count);
@@ -815,7 +821,10 @@ public class DES {
 		// xors the expansion with the 48 bit key
 		BitSet sBoxFeed = key_i.xor(expansion);
 		long lookup;
+<<<<<<< HEAD
 
+=======
+>>>>>>> FETCH_HEAD
 
 		// perform S-Box substitution
 		for(i = 0; i < 8; i ++)
