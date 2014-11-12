@@ -557,7 +557,6 @@ public class DES {
 		}
 	}
 
-<<<<<<< HEAD
 	/*-------------------------------------------------------------------------------------
 	 |	Purpose:	this iterates through the textfile, getting all the proper sized
 	 |				blocks. 
@@ -604,7 +603,6 @@ public class DES {
 			}
 
 		return blocks;
-=======
 	static BitSet pBoxPermutation(BitSet key56) {
 		BitSet ret = new BitSet(56);
 		byte[] keyArr = key.toByteArray();
@@ -667,14 +665,11 @@ public class DES {
 		for(int i = 1; i < 16; i ++)
 		{
 			stage1 = permutatedChoice_1(keys[i-1]);
-<<<<<<< HEAD
 			left = generateShiftKey(shifts[i], stage1.set(0, 27));
 			right = generateShiftKey(shifts[i], stage1.set(28,55));
-=======
+
 			left = shift(shifts[i], stage1.set(0, 27));
 			right = shift(shifts[i], stage1.set(28,55));
->>>>>>> FETCH_HEAD
->>>>>>> FETCH_HEAD
 
 			keys[i] = permutatedChoice2(left.xor(right));
 		}
@@ -805,7 +800,6 @@ public class DES {
 		// expands the 32 bit key into 48 bits
 		BitSet expansion = expansionPermutation(right32);
 
-<<<<<<< HEAD
 		String temp = blockList.get(index);
 		count = count % _keyLen;
 		System.out.println(count);
@@ -814,11 +808,10 @@ public class DES {
 			temp = "0" + temp;
 			count++;
 		}
-=======
+
 		// xors the expansion with the 48 bit key
 		BitSet sBoxFeed = key_i.xor(expansion);
 		long lookup;
->>>>>>> FETCH_HEAD
 
 		// perform S-Box substitution
 		for(i = 0; i < 8; i ++)
