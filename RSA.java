@@ -9,7 +9,7 @@ import java.io.*;
 public class RSA {
 	private static final BigInteger e = new BigInteger("65537");		
 
-	// check arguments, but straightforward otherwise
+
 	public static void main(String []args) {
 		int i;
 		if(args.length < 1)
@@ -67,17 +67,40 @@ public class RSA {
 		else exit();
 	}
 
-	// method header later
+	/*-------------------------------------------------------------------------------------
+	 |	Purpose:	This is used whenever a bad argument is encountered
+	 |
+	 |	Pre-Cond:	n/a
+	 |
+	 |	Post-Cond:	The program is exited succesfully
+	 |
+	 |	Parameters:	n/a
+	 |
+	 |	Returns:	void
+	 |
+	 `-------------------------------------------------------------------------------------*/
 	static void exit() {
 		System.out.println("Type 'java RSA -h' for help\n");
 		System.exit(1);
 	}
 
-	/*
-	 * msg = M (encryption) or C (decryption)
-	 * modulus = modulus from the totient
-	 * exp = e (encryption, global) or d (decryption, private key)
-	 */
+	/*-------------------------------------------------------------------------------------
+	 |	Purpose:	this handles encoding/decoding a String with RSA
+	 |
+	 |	Pre-Cond:	msg is a proper size
+	 |
+	 |	Post-Cond:	No variables have been changed
+	 |
+	 |	Parameters:	msg:		This is the message that's being encoded, padded if need be
+	 |				modulus:	This is the n in phi(n), or p * q (which are trivial large primes)
+	 |				exp:		encrypt:
+	 |								e, which is a global variable
+	 |							decrypt:
+	 |								d, which is the private key
+	 |
+	 |	Returns:	String:		the encrypted utf-8 string
+	 |
+	 `-------------------------------------------------------------------------------------*/
 	static String cipher(String msg, BigInteger modulus, BigInteger exp) {
 		BigInteger convertedMsg;
 		// handling decryption differences
@@ -89,6 +112,22 @@ public class RSA {
 		return ret;
 	}
 
+	/*-------------------------------------------------------------------------------------
+	 |	Purpose:	this iterates through the textfile, getting all the proper sized
+	 |				payloads. 
+	 |
+	 |	Pre-Cond:	the file exists, is a valid format, and that a command line file was 
+	 |				provided
+	 |
+	 |	Post-Cond:	The message is put into properly sized blocks, with consideration for
+	 |				the last one, padding being placed at the front of the block
+	 |
+	 |	Parameters:	fs:			the FileInputStream that is being read from, byte by byte
+	 |				keyLength:	how many hex values are in the key
+	 |
+	 |	Returns:	ArrayList:	the ascii Strings that are read in
+	 |
+	 `-------------------------------------------------------------------------------------*/
 	static ArrayList<String> getPayloads(FileInputStream fs, int keyLength) {
 		ArrayList<String> payload = new ArrayList<String>();
 		int listIndex = -1, strIndex = 0;
@@ -100,21 +139,19 @@ public class RSA {
 			while((next = (char)fs.read()) != 0xffff)
 			{
 				// keyLength accounts for hex(4 bits), but you are now reading chars(8 bits)
-				if(strIndex % (keyLength / 2) == 0)
+				if(strIndex % ((keyLength / 2) - 1) == 0)
 				{
 					listIndex += 1;
 					payload.add("");
+					strIndex = 0;
 				}
 				payload.set(listIndex, payload.get(listIndex) + next);
 				strIndex ++;
 			}
 		} catch(IOException e) {};
 
-//		keep this in case you need to care about newlines later
-//		payload.set(listIndex, payload.get(listIndex).substring(0,payload.get(listIndex).length() - 1));
-		System.out.println("hello");
 		// padding on the last payload
-		if(strIndex > 0)
+		if(strIndex != 0)
 			while(strIndex < (keyLength / 2))
 			{
 				payload.set(listIndex, '0' + payload.get(listIndex));
@@ -124,7 +161,19 @@ public class RSA {
 		return payload;
 	}
 
-	// fairly straightforward, method header later
+	/*-------------------------------------------------------------------------------------
+	 |	Purpose:	read the key from file
+	 |
+	 |	Pre-Cond:	the file is valid
+	 |
+	 |	Post-Cond:	the file has been read in and converted from hex to the String
+	 |				representation
+	 |
+	 |	Parameters:	fs:	the FileInputStream for the key
+	 |
+	 |	Returns:	String:	the String representation of the hex value read in
+	 |
+	 `-------------------------------------------------------------------------------------*/
 	static String readKey(FileInputStream fs) {
 		StringBuilder keyBuilder = new StringBuilder();
 		char next;
@@ -139,6 +188,18 @@ public class RSA {
 		return keyBuilder.toString();
 	}
 
+	/*-------------------------------------------------------------------------------------
+	 |	Purpose:	Reads in nibblets and converts them to ascii
+	 |
+	 |	Pre-Cond:	str has values 0-9, and an even number
+	 |
+	 |	Post-Cond:	the String has been converted to the ASCII equivalent
+	 |
+	 |	Parameters:	str:	The string containing nibblets
+	 |
+	 |	Returns:	String:	the String of ASCII equivalents to the bytes
+	 |
+	 `-------------------------------------------------------------------------------------*/
 	static String convertToAscii(String str) {
 		char[] conversion = new char[str.length() / 2];
 		for(int i = 0; i < str.length() - 2; i += 2)
@@ -149,21 +210,29 @@ public class RSA {
 		return String.copyValueOf(conversion);
 	}
 
-	// commented inline, method header later
+	/*-------------------------------------------------------------------------------------
+	 |	Purpose:	This is used to encrypt a message
+	 |
+	 |	Pre-Cond:	all values in args[] are proper
+	 |
+	 |	Post-Cond:	the files have been read, and the encryption has been written to file
+	 |
+	 |	Parameters:	args[]:	0:	The name of the key, without the .public
+	 |						1:	The name of the msg file
+	 |						2:	The name of the outputfile
+	 |
+	 |	Returns:	void
+	 |
+	 `-------------------------------------------------------------------------------------*/
 	static void encrypt(String[] args) {
 		// gets the key into a BigInteger
 		FileInputStream pubKey_fs = openInputFile(args[0].concat(".public"));
 		String key = readKey(pubKey_fs);
 		BigInteger bigKey = new BigInteger(key, 16);
 
-		System.out.println("hi");
 		// gets all the payloads into an ArrayList
 		FileInputStream input_fs = openInputFile(args[1]);
 		ArrayList<String> payload = getPayloads(input_fs, key.length());
-
-		//testing
-		for(int i = 0; i < payload.size(); i ++)
-			System.out.println("--> " + i + ": " + payload.get(i));
 
 		// writes the encoded text into the output file
 		PrintWriter output_fw = openOutputFile(args[2]);
@@ -177,6 +246,20 @@ public class RSA {
 		output_fw.close();
 	}
 
+	/*-------------------------------------------------------------------------------------
+	 |	Purpose:	This is used to decrypt a cipher text
+	 |
+	 |	Pre-Cond:	all values in args[] are value
+	 |
+	 |	Post-Cond:	The cipher text has been converted to plaintext and written to file
+	 |
+	 |	Parameters:	args[]:	0:	the name of the users public and private key
+	 |						1:	the name of the input file
+	 |						2:	the name of the output file
+	 |
+	 |	Returns:	void
+	 |
+	 `-------------------------------------------------------------------------------------*/
 	static void decrypt(String[] args) {
 		// get the d from private key 
 		FileInputStream privKey_fs = openInputFile(args[0].concat(".private"));
@@ -208,8 +291,19 @@ public class RSA {
 		catch(Exception e){}
 	}
 
-	// uses randomness from system and oddity
-	static long generateLong() {
+	/*-------------------------------------------------------------------------------------
+	 |	Purpose:	generate a random long value
+	 |
+	 |	Pre-Cond:	MouseInfo is imported
+	 |
+	 |	Post-Cond:	nothing is changed
+	 |
+	 |	Parameters:	n/a
+	 |
+	 |	Returns:	long:	a random long
+	 |
+	 `-------------------------------------------------------------------------------------*/
+	public static long generateLong() {
 		long time = System.currentTimeMillis(), point, time2;
 		Point pt = MouseInfo.getPointerInfo().getLocation();
 		point = (long) (pt.getY() * (1 + pt.getY()));
@@ -223,7 +317,18 @@ public class RSA {
 		return time ^ System.currentTimeMillis();
 	}
 
-	// straightforward, make method header later
+	/*-------------------------------------------------------------------------------------
+	 |	Purpose:	opens a FileInputStream
+	 |
+	 |	Pre-Cond:	filename is valid
+	 |
+	 |	Post-Cond:	the file is opened
+	 |
+	 |	Parameters:	filename:	the string name to be opened
+	 |
+	 |	Returns:	FileInputStream:	a stream to read from
+	 |
+	 `-------------------------------------------------------------------------------------*/
 	static FileInputStream openInputFile(String filename) {
 		FileInputStream fs;
 
@@ -239,7 +344,18 @@ public class RSA {
 		return null;
 	}
 
-	// straightforward, make method header later
+	/*-------------------------------------------------------------------------------------
+	 |	Purpose:	opens an output stream
+	 |
+	 |	Pre-Cond:	filename is valid
+	 |
+	 |	Post-Cond:	the file is opened
+	 |
+	 |	Parameters:	filename:	the file to be opened
+	 |
+	 |	Returns:	PrintWriter:	a stream to write to
+	 |
+	 `-------------------------------------------------------------------------------------*/
 	static PrintWriter openOutputFile(String filename) {
 		PrintWriter fw;
 
@@ -256,7 +372,19 @@ public class RSA {
 		return null;
 	}
 
-	// generate a public and private key, using the filenames in args
+	/*-------------------------------------------------------------------------------------
+	 |	Purpose:	generates a private and public key
+	 |
+	 |	Pre-Cond:	the args[] are valid
+	 |
+	 |	Post-Cond:	a .public and .private key have been written to
+	 |
+	 |	Parameters:	args[]:	0:	the name of the keys to be generated
+	 |						1:	the number of bits the key has to be
+	 |
+	 |	Returns:	void
+	 |
+	 `-------------------------------------------------------------------------------------*/
 	static void generateKey(String[] args) {
 		Random rnd = new Random(generateLong());
 		BigInteger public_key, totient, private_key,
@@ -274,7 +402,8 @@ public class RSA {
 		public_key = possiblePrime_q.multiply(possiblePrime_p);
 
 		// calculate the private key
-		totient = ((possiblePrime_p).subtract(BigInteger.ONE)).multiply((possiblePrime_q).subtract(BigInteger.ONE));
+		totient = ((possiblePrime_p).subtract(BigInteger.ONE))
+			.multiply((possiblePrime_q).subtract(BigInteger.ONE));
 		private_key = public_key.modInverse(totient);
 		System.out.println(private_key);
 
