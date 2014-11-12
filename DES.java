@@ -311,7 +311,7 @@ public class DES {
 				case 16: setIndex++;
 				case 48: setIndex++;
 				case 8: setIndex++;
-				case 40: setIndex++;
+				case 40:
 					ret.set(setIndex);
 					break;
 			}
@@ -508,10 +508,68 @@ public class DES {
 		}
 	}
 
+	/*-------------------------------------------------------------------------------------
+	 |	Purpose:	this iterates through the textfile, getting all the proper sized
+	 |				blocks. 
+	 |
+	 |	Pre-Cond:	the file exists, is a valid format, and that a command line file was 
+	 |				provided
+	 |
+	 |	Post-Cond:	The message is put into properly sized blocks, with consideration for
+	 |				the last one, padding being placed at the end of the block
+	 |
+	 |	Parameters:	fs:			the FileInputStream that is being read from, byte by byte
+	 |
+	 |	Returns:	ArrayList:	the ascii Strings that are read in
+	 |
+	 `-------------------------------------------------------------------------------------*/
 
 	static ArrayList<String> getBlocks(FileInputStream fs) {
+		ArrayList<String> blocks = new ArrayList<String>();
+		int listIndex = -1, strIndex = 0;
+		char next;
+
+		// this adds the proper blocks to the arraylist
+		try 
+		{
+			while((next = (char)fs.read()) != -1)
+			{
+				if(strIndex % ((_keyLen) - 1) == 0)
+				{
+					listIndex += 1;
+					blocks.add("");
+					strIndex = 0;
+				}
+				blocks.set(listIndex, blocks.get(listIndex) + next);
+				strIndex ++;
+			}
+		} catch(IOException e) {};
+
+		// padding on the last block
+		if(strIndex != 0)
+			while(strIndex < (_keyLen))
+			{
+				blocks.set(listIndex, blocks.get(listIndex) + '0');
+				strIndex ++;
+			}
+
+		return blocks;
 
 	}
+
+	/*-------------------------------------------------------------------------------------
+	 |	Purpose:	Performs/readies encryption steps. 
+	 |
+	 |	Pre-Cond:	the file exists, is a valid format, and that a command line file was 
+	 |				provided
+	 |
+	 |	Post-Cond:	Message was properly encrypted following encryption steps.
+	 |
+	 |	Parameters:	args:	Input and output files for message and encrypted message.
+	 |
+	 |	Returns:	void.
+	 |
+	 `-------------------------------------------------------------------------------------*/
 
 	static void encrypt(String[] args) throws Exception{
 		PrintWriter fw = openOutputFile(args[2]);
@@ -684,7 +742,7 @@ public class DES {
 		String temp = blockList.get(index);
 		count = count % _keyLen;
 		System.out.println(count);
-		while(count < _keyLen && count != 0)
+		while(count < _keyLen && count != 0) //padding
 		{
 			temp = "0" + temp;
 			count++;
