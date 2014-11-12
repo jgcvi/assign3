@@ -606,10 +606,6 @@ public class DES {
 		return ret;
 	}
 
-	static BitSet shift(int shift, BitSet key28) {
-
-	}
-
 	static BitSet[] getAllKeys(BitSet key64) {
 		BitSet[] keys = new BitSet[16];
 		BitSet stage1, stage2, left, right;
@@ -623,8 +619,8 @@ public class DES {
 		for(int i = 1; i < 16; i ++)
 		{
 			stage1 = permutatedChoice_1(keys[i-1]);
-			left = shift(shifts[i], stage1.set(0, 27));
-			right = shift(shifts[i], stage1.set(28,55));
+			left = generateShiftKey(shifts[i], stage1.set(0, 27));
+			right = generateShiftKey(shifts[i], stage1.set(28,55));
 
 			keys[i] = permutatedChoice2(left.xor(right));
 		}
